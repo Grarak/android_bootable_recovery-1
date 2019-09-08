@@ -22,6 +22,7 @@
 #include <ext4_utils/ext4_crypt.h>
 
 #include <string>
+#include <cutils/properties.h>
 
 namespace android {
 namespace vold {
@@ -37,7 +38,11 @@ class KeyAuthentication {
   public:
     KeyAuthentication(std::string t, std::string s) : token{t}, secret{s} {};
 
-    bool usesKeymaster() const { return !token.empty() || secret.empty(); };
+    bool usesKeymaster() const {
+        char paramstr[PROPERTY_VALUE_MAX];
+        property_get("keymaster.force", paramstr, "false");
+        return strcmp(paramstr, "true") == 0 || !token.empty() || secret.empty();
+    };
 
     const std::string token;
     const std::string secret;
